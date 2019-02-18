@@ -43,12 +43,13 @@ public class CustomGameMenu extends Game<CharacterCanvas> implements Game.KeyDow
         super(plugin);
 
         // Application settings
-        addOption(GameOption.TPS, 5);               // 5 ticks per second
-        addOption(GameOption.SCREEN_HEIGHT, 15);    // 15 height
-        addOption(GameOption.SCREEN_WIDTH, 25);     // 25 width (size of logo / 16px)
+        setOption(GameOption.TPS, 5);               // 5 ticks per second
+        setOption(GameOption.SCREEN_HEIGHT, 15);    // 15 height
+        setOption(GameOption.SCREEN_WIDTH, 25);     // 25 width (size of logo / 16px)
+        setOption(GameOption.VISIBLE, false);       // DO NOT show the game in the menu (required for this menu app)
 
         // Do not use a black background
-        addOption(GameOption.BACKGROUND, GameOption.Choice.DISABLED);
+        setOption(GameOption.BACKGROUND, GameOption.Choice.DISABLED);
 
         // Construct the resource pack (logo of the server and custom font)
         try {
@@ -61,7 +62,7 @@ public class CustomGameMenu extends Game<CharacterCanvas> implements Game.KeyDow
                 resourcePack.addImage("LOGO", getClass().getResourceAsStream("/logo.png"));
             }
             // Never forget to add the created resource pack as a game option
-            addOption(GameOption.RESOURCE_PACK, resourcePack);
+            setOption(GameOption.RESOURCE_PACK, resourcePack);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -155,7 +156,10 @@ public class CustomGameMenu extends Game<CharacterCanvas> implements Game.KeyDow
         for (GameInformation gameInformation : getPlugin().getGameManager().getAvailableGames()) {
             // Check if the player has permission
             if (gameInformation.hasPermission(event.getGamePlayer().getPlayer())) {
-                gamesList.add(gameInformation);
+                // Make sure to only show visible games
+                if (gameInformation.getOptionBoolean(GameOption.VISIBLE)) {
+                    gamesList.add(gameInformation);
+                }
             }
         }
 
@@ -202,6 +206,25 @@ public class CustomGameMenu extends Game<CharacterCanvas> implements Game.KeyDow
             case SNEAK:             // Note pressing F also quits the menu (global key)
                 // Quit menu/game
                 stop();
+                break;
+            /*
+            Scrolling: Because we have not specifically enabled scrolling,
+            the NUM key is always cancelled when moving AWAY from NUM_9
+            This allows us to use NUM 8 and NUM 1 to detect up or down scrolling
+             */
+            case NUM_1:
+                // Move down the list
+                if (currentIdx < gamesList.size() - 1) {
+                    currentIdx++;
+                    selectedGame = gamesList.get(currentIdx);
+                }
+                break;
+            case NUM_8:
+                // Move up the list
+                if (currentIdx > 0) {
+                    currentIdx--;
+                    selectedGame = gamesList.get(currentIdx);
+                }
                 break;
         }
     }

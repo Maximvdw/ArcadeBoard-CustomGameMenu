@@ -12,6 +12,7 @@ import be.arcadeboard.api.player.events.KeyDownEvent;
 import be.arcadeboard.api.resources.ColorResource;
 import be.arcadeboard.api.resources.ResourceFont;
 import be.arcadeboard.api.resources.ResourcePack;
+import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,6 +144,10 @@ public class CustomGameMenu extends Game<CharacterCanvas> implements Game.KeyDow
         // Make sure the X location results in a centered name
         int x = (25 - nameLength) / 2;
         canvas.writeString(x, y, color + gameName, ResourceFont.getDefaultFont());
+        // Make sure the last character contains a reset color
+        // This avoids the logo looking dark
+        CharacterCanvas.CharacterPixel pixel = canvas.getPixel(x + gameName.length(), y);
+        pixel.setContent(pixel.getContent() + ChatColor.RESET);
     }
 
     /**
